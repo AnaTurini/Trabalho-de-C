@@ -117,8 +117,7 @@ void gravar_usuarios(Usuario usuarios[], int total_usuarios, int total_moedas) {
     fclose(arquivo);
 }
 
-/* Copia a struct do usuario logado para o vetor (achando pelo CPF)
-   e salva no arquivo. Chamar sempre que mudar algum dado do logado. */
+/* Copia a struct do usuario logado para o vetor (achando pelo CPF) e salva no arquivo. Chamar sempre que mudar algum dado do logado. */
 void atualizar_usuario(Usuario usuarios[], int total_usuarios,
                        Usuario *logado, int total_moedas) {
     int posicao;
@@ -133,10 +132,9 @@ void atualizar_usuario(Usuario usuarios[], int total_usuarios,
     gravar_usuarios(usuarios, total_usuarios, total_moedas);
 }
 
-/* ============================ EXTRATO ============================ */
+/*  EXTRATO  */
 
-/* Escreve uma linha no fim do extrato do usuario (extrato_CPF.txt).
-   Deposito e saque usam sigla "REAL", cotacao 0 e taxa 0. */
+/* Escreve uma linha no fim do extrato do usuario (extrato_CPF.txt).*/
 void anotar_no_extrato(Usuario *usuario, char sinal, float valor, char sigla[],
                        float cotacao, float taxa, Moeda moedas[], int total_moedas) {
     FILE *arquivo;
@@ -170,7 +168,7 @@ void anotar_no_extrato(Usuario *usuario, char sinal, float valor, char sigla[],
     fclose(arquivo);
 }
 
-/* ============================ AJUDANTES ============================ */
+/*  AJUDANTES  */
 
 /* Devolve 1 se o CPF tem 11 numeros, senao 0 */
 int cpf_valido(char cpf[]) {
@@ -214,7 +212,7 @@ int procurar_usuario(Usuario usuarios[], int total_usuarios, char cpf[]) {
     return -1;
 }
 
-/* Pede a senha. Devolve 1 se estiver certa, senao 0 */
+
 int pedir_senha(Usuario *usuario) {
     char senha[20];
 
@@ -257,10 +255,8 @@ void mostrar_saldos(Usuario *usuario, Moeda moedas[], int total_moedas) {
     }
 }
 
-/* ========================== OPCOES DO MENU ========================== */
+/*  OPCOES DO MENU = */
 
-/* Pede CPF e senha. Se estiverem certos, copia os dados do usuario
-   para a struct logado e devolve 1. Se errar, devolve 0. */
 int fazer_login(Usuario usuarios[], int total_usuarios, Usuario *logado) {
     char cpf[20];
     char senha[20];
@@ -379,8 +375,7 @@ void sacar(Usuario *logado, Usuario usuarios[], int total_usuarios,
     mostrar_saldos(logado, moedas, total_moedas);
 }
 
-/* Deixa o usuario trocar o proprio nome ou a senha.
-   O CPF nao muda, porque ele identifica o usuario e o arquivo de extrato. */
+/* Deixa o usuario trocar o proprio nome ou a senha. O CPF nao muda, porque ele identifica o usuario e o arquivo de extrato. */
 void alterar_dados(Usuario *logado, Usuario usuarios[], int total_usuarios,
                    int total_moedas) {
     int opcao;
