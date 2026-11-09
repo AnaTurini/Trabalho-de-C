@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "exchange.h"
 
 int main(void) {
@@ -18,6 +19,7 @@ int main(void) {
 
     /* le as moedas primeiro, porque o usuarios.txt tem um saldo para cada moeda */
     total_moedas = ler_moedas(moedas);
+    srand(time(NULL));   /* faz o rand() dar numeros diferentes a cada execucao */
     total_usuarios = ler_usuarios(usuarios, total_moedas);
 
     printf("===== EXCHANGE DE CRIPTOMOEDAS =====\n");
@@ -25,6 +27,12 @@ int main(void) {
     /* so sai daqui quando o login der certo */
     while (!entrou) {
         entrou = fazer_login(usuarios, total_usuarios, &logado);
+    }
+    
+        /* se for o administrador, abre o menu dele e termina o programa */
+    if (entrou == 2) {
+        menu_adm(usuarios, &total_usuarios, moedas, total_moedas);
+        return 0;
     }
 
     do {
@@ -56,15 +64,15 @@ int main(void) {
                 break;
             case 5:
                 /* parte da dupla: comprar */
-                printf("Em construcao.\n");
+                comprar(&logado, usuarios, total_usuarios, moedas, total_moedas);
                 break;
             case 6:
                 /* parte da dupla: vender */
-                printf("Em construcao.\n");
+                vender(&logado, usuarios, total_usuarios, moedas, total_moedas);
                 break;
             case 7:
                 /* parte da dupla: atualizar cotacao */
-                printf("Em construcao.\n");
+                atualizar_cotacao(moedas, total_moedas);
                 break;
             case 8:
                 atualizar_usuario(usuarios, total_usuarios, &logado, total_moedas);
