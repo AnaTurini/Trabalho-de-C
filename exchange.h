@@ -68,7 +68,11 @@ void comprar(Usuario *logado, Usuario usuarios[], int total_usuarios,
 void vender(Usuario *logado, Usuario usuarios[], int total_usuarios,
             Moeda moedas[], int total_moedas);
 void menu_adm(Usuario usuarios[], int *total_usuarios,
-              Moeda moedas[], int total_moedas);
+              Moeda moedas[], int *total_moedas);
+void adm_cadastrar_moeda(Usuario usuarios[], int total_usuarios,
+                         Moeda moedas[], int *total_moedas);
+void adm_excluir_moeda(Usuario usuarios[], int total_usuarios,
+                       Moeda moedas[], int *total_moedas);
 void adm_ver_saldo(Usuario usuarios[], int total_usuarios,
                    Moeda moedas[], int total_moedas);
 void adm_ver_extrato(Usuario usuarios[], int total_usuarios);

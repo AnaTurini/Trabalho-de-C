@@ -31,7 +31,7 @@ int main(void) {
     
         /* se for o administrador, abre o menu dele e termina o programa */
     if (entrou == 2) {
-        menu_adm(usuarios, &total_usuarios, moedas, total_moedas);
+        menu_adm(usuarios, &total_usuarios, moedas, &total_moedas);
         return 0;
     }
 

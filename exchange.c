@@ -563,43 +563,51 @@ void vender(Usuario *logado, Usuario usuarios[], int total_usuarios,
 
 /* Menu do administrador */
 void menu_adm(Usuario usuarios[], int *total_usuarios,
-              Moeda moedas[], int total_moedas) {
+              Moeda moedas[], int *total_moedas) {
     int opcao;
 
     do {
         printf("\n===== MENU ADMINISTRADOR =====\n");
         printf("1. Cadastrar novo investidor\n");
         printf("2. Excluir investidor\n");
-        printf("3. Consultar saldo de um investidor\n");
-        printf("4. Consultar extrato de um investidor\n");
-        printf("5. Atualizar cotacao\n");
-        printf("6. Sair\n");
+        printf("3. Cadastrar nova criptomoeda\n");
+        printf("4. Excluir criptomoeda\n");
+        printf("5. Consultar saldo de um investidor\n");
+        printf("6. Consultar extrato de um investidor\n");
+        printf("7. Atualizar cotacao\n");
+        printf("8. Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
 
         switch (opcao) {
             case 1:
-                adm_cadastrar_investidor(usuarios, total_usuarios, total_moedas);
+                adm_cadastrar_investidor(usuarios, total_usuarios, *total_moedas);
                 break;
             case 2:
-                adm_excluir_investidor(usuarios, total_usuarios, moedas, total_moedas);
+                adm_excluir_investidor(usuarios, total_usuarios, moedas, *total_moedas);
                 break;
             case 3:
-                adm_ver_saldo(usuarios, *total_usuarios, moedas, total_moedas);
+                adm_cadastrar_moeda(usuarios, *total_usuarios, moedas, total_moedas);
                 break;
             case 4:
-                adm_ver_extrato(usuarios, *total_usuarios);
+                adm_excluir_moeda(usuarios, *total_usuarios, moedas, total_moedas);
                 break;
             case 5:
-                atualizar_cotacao(moedas, total_moedas);
+                adm_ver_saldo(usuarios, *total_usuarios, moedas, *total_moedas);
                 break;
             case 6:
+                adm_ver_extrato(usuarios, *total_usuarios);
+                break;
+            case 7:
+                atualizar_cotacao(moedas, *total_moedas);
+                break;
+            case 8:
                 printf("Ate logo, administrador!\n");
                 break;
             default:
                 printf("Opcao invalida!\n");
         }
-    } while (opcao != 6);
+    } while (opcao != 8);
 }
 
 /* Administrador: mostra o saldo de um investidor, achado pelo CPF */
@@ -766,4 +774,137 @@ void adm_excluir_investidor(Usuario usuarios[], int *total_usuarios,
     remove(nome_arquivo);
 
     printf("Investidor excluido com sucesso!\n");
+}
+/* Administrador: cadastra uma nova criptomoeda */
+void adm_cadastrar_moeda(Usuario usuarios[], int total_usuarios,
+                         Moeda moedas[], int *total_moedas) {
+    char sigla[20];
+    char nome[30];
+    float cotacao;
+    float taxa_compra;   /* digitada em porcentagem, ex: 2 */
+    float taxa_venda;
+    int i;
+
+    printf("\n===== CADASTRAR CRIPTOMOEDA =====\n");
+
+    if (*total_moedas >= MAX_MOEDAS) {
+        printf("Nao cabe mais nenhuma criptomoeda!\n");
+        return;
+    }
+
+    printf("Sigla (ate 5 letras, ex: DOGE): ");
+    scanf("%19s", sigla);
+    if (strlen(sigla) > 5) {
+        printf("Sigla invalida! Use no maximo 5 caracteres.\n");
+        return;
+    }
+    for (i = 0; sigla[i] != '\0'; i++) {
+        sigla[i] = toupper(sigla[i]);   /* deixa em maiuscula */
+    }
+    for (i = 0; i < *total_moedas; i++) {
+        if (strcmp(moedas[i].sigla, sigla) == 0) {
+            printf("Essa criptomoeda ja esta cadastrada!\n");
+            return;
+        }
+    }
+
+    printf("Nome: ");
+    scanf(" %29[^\n]", nome);
+
+    printf("Cotacao em reais: R$ ");
+    scanf("%f", &cotacao);
+    if (cotacao < 0.01) {
+        printf("Cotacao invalida! Digite um valor de pelo menos R$ 0.01.\n");
+        return;
+    }
+
+    printf("Taxa de compra em %% (ex: 2 para 2%%): ");
+    scanf("%f", &taxa_compra);
+    printf("Taxa de venda em %% (ex: 3 para 3%%): ");
+    scanf("%f", &taxa_venda);
+    if (taxa_compra < 0 || taxa_compra > 100 ||
+        taxa_venda < 0 || taxa_venda > 100) {
+        printf("Taxa invalida! Digite um valor entre 0 e 100.\n");
+        return;
+    }
+
+    /* coloca a nova moeda no fim do vetor (as taxas ficam em fracao: 2% = 0.02) */
+    strcpy(moedas[*total_moedas].sigla, sigla);
+    strcpy(moedas[*total_moedas].nome, nome);
+    moedas[*total_moedas].cotacao = cotacao;
+    moedas[*total_moedas].taxa_compra = taxa_compra / 100;
+    moedas[*total_moedas].taxa_venda = taxa_venda / 100;
+
+    /* todos os investidores comecam com saldo zero dessa moeda */
+    for (i = 0; i < total_usuarios; i++) {
+        usuarios[i].saldo_moeda[*total_moedas] = 0;
+    }
+
+    *total_moedas = *total_moedas + 1;
+    gravar_moedas(moedas, *total_moedas);
+    gravar_usuarios(usuarios, total_usuarios, *total_moedas);
+
+    printf("Criptomoeda cadastrada com sucesso!\n");
+}
+
+/* Administrador: exclui uma criptomoeda (so se ninguem tiver saldo dela) */
+void adm_excluir_moeda(Usuario usuarios[], int total_usuarios,
+                       Moeda moedas[], int *total_moedas) {
+    int i;          /* posicao da moeda escolhida */
+    int j;
+    int k;
+    int escolha;
+    char resposta;
+
+    printf("\n===== EXCLUIR CRIPTOMOEDA =====\n");
+
+    if (*total_moedas == 0) {
+        printf("Nao ha nenhuma criptomoeda cadastrada!\n");
+        return;
+    }
+
+    for (j = 0; j < *total_moedas; j++) {
+        printf("%d. %s (%s) - R$ %.2f\n", j + 1, moedas[j].nome,
+               moedas[j].sigla, moedas[j].cotacao);
+    }
+    printf("Qual moeda deseja excluir? ");
+    scanf("%d", &escolha);
+    if (escolha < 1 || escolha > *total_moedas) {
+        printf("Moeda invalida!\n");
+        return;
+    }
+    i = escolha - 1;   /* posicao no vetor comeca em 0 */
+
+    /* nao deixa excluir se algum investidor ainda tem essa moeda */
+    for (k = 0; k < total_usuarios; k++) {
+        if (usuarios[k].saldo_moeda[i] > 0.000001) {
+            printf("Nao e possivel excluir: %s ainda tem saldo de %s.\n",
+                   usuarios[k].nome, moedas[i].sigla);
+            return;
+        }
+    }
+
+    printf("Tem certeza que deseja excluir %s? (s/n): ", moedas[i].nome);
+    scanf(" %c", &resposta);
+    if (resposta != 's' && resposta != 'S') {
+        printf("Exclusao cancelada.\n");
+        return;
+    }
+
+    /* puxa as moedas de tras uma posicao para frente */
+    for (j = i; j < *total_moedas - 1; j++) {
+        moedas[j] = moedas[j + 1];
+    }
+    /* faz o mesmo com o saldo de cada investidor */
+    for (k = 0; k < total_usuarios; k++) {
+        for (j = i; j < *total_moedas - 1; j++) {
+            usuarios[k].saldo_moeda[j] = usuarios[k].saldo_moeda[j + 1];
+        }
+    }
+
+    *total_moedas = *total_moedas - 1;
+    gravar_moedas(moedas, *total_moedas);
+    gravar_usuarios(usuarios, total_usuarios, *total_moedas);
+
+    printf("Criptomoeda excluida com sucesso!\n");
 }
